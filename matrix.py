@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import math
 import os
 import random
 import sys
@@ -18,17 +19,78 @@ class Move(object):
 class Shape(object):
 
     def __init__(self):
-        pass
+        self.points = []
+
+    def __iter__(self):
+        return iter(self.points)
+
+    @property
+    def points(self):
+        return self._points
+
+    @points.setter
+    def points(self, value):
+        self._points = value
+
+    def __str__(self):
+        return str(self.points)
+
+    def __repr__(self):
+        return self.__str__()
+
+
+class Circle(Shape):
+
+    def __init__(self, x0=0, y0=0, radius=None):
+        super().__init__()
+
+        self.radius = min(HEIGHT, WIDTH) if radius is None else radius
+        self._init_origin(x0, y0)
+        self._init_points()
+
+    def _init_origin(self, x0, y0):
+        self.x0 = x0
+        self.y0 = y0
+
+    def _init_points(self):
+        angle = .0
+        while angle < 360:
+            x = self.radius * math.cos(angle*(math.pi/180)) + self.x0
+            y = (math.sin(angle*(math.pi/180)) * self.radius) + self.y0
+            self.points.append((x, y))
+            angle += 5 * (1.0 / self.radius)
+
+    @property
+    def radius(self):
+        return self._radius
+
+    @radius.setter
+    def radius(self, value):
+        self._radius = value
+
+    @property
+    def x0(self):
+        return self._x0
+
+    @x0.setter
+    def x0(self, value):
+        self._x0 = value
+
+    @property
+    def y0(self):
+        return self._y0
+
+    @y0.setter
+    def y0(self, value):
+        self._y0 = value
 
 
 class Line(Shape):
 
     def __init__(self, x1=0, y1=0, x2=WIDTH, y2=HEIGHT):
+        super().__init__()
         self._init_coordinates(x1, y1, x2, y2)
         self._init_points()
-
-    def __iter__(self):
-        return iter(self.points)
 
     def _get_sorted_coordinates(self, pos1, pos2):
             return min(pos1, pos2), max(pos1, pos2)
@@ -40,7 +102,7 @@ class Line(Shape):
     def _init_points(self):
         self.points = [(
             pos,
-            int((self.slope * pos) + self.pos_shift)
+            (self.slope * pos) + self.pos_shift
         )[::self.direction] for pos in self.positions]
 
     @property
@@ -67,14 +129,6 @@ class Line(Shape):
     @slope.setter
     def slope(self, value):
         self._slope = value
-
-    @property
-    def points(self):
-        return self._points
-
-    @points.setter
-    def points(self, points):
-        self._points = points
 
     @property
     def x_axis(self):
@@ -120,9 +174,6 @@ class Line(Shape):
     def y_min(self, value):
         self._y_min = value
 
-    def __str__(self):
-        return str(self.points)
-
 
 class Cell(object):
 
@@ -153,8 +204,8 @@ class Cell(object):
         return self._state
 
     @state.setter
-    def state(self, number=0):
-        self._state = number % len(self.states)
+    def state(self, value=0):
+        self._state = value % len(self.states)
 
     @property
     def states(self):
@@ -201,8 +252,8 @@ class Matrix(object):
         return self._height
 
     @height.setter
-    def height(self, height):
-        self._height = height
+    def height(self, value):
+        self._height = value
 
     def row(self, row=0):
         return [self.cells[number] for number in range(
@@ -219,8 +270,8 @@ class Matrix(object):
         return self._width
 
     @width.setter
-    def width(self, width):
-        self._width = width
+    def width(self, value):
+        self._width = value
 
     def __str__(self):
         return "\n".join([
@@ -243,7 +294,8 @@ class Projection(object):
         for shape in self.shapes:
             for x, y in shape:
                 try:
-                    self._matrix.cell(x, y).inc()
+                    #self._matrix.cell(x, y).inc()
+                    self._matrix.cell(round(x), round(y)).on()
                 except (IndexError,):
                     pass
 
@@ -255,24 +307,24 @@ class Projection(object):
         return self._height
 
     @height.setter
-    def height(self, height):
-        self._height = height
+    def height(self, value):
+        self._height = value
 
     @property
     def shapes(self):
         return self._shapes
 
     @shapes.setter
-    def shapes(self, shapes):
-        self._shapes = shapes
+    def shapes(self, value):
+        self._shapes = value
 
     @property
     def width(self):
         return self._width
 
     @width.setter
-    def width(self, width):
-        self._width = width
+    def width(self, value):
+        self._width = value
 
     def __str__(self):
         self._init_matrix()
@@ -285,11 +337,9 @@ class Projection(object):
 def main():
     projection = Projection()
     projection.shapes = [
-        Line(50,0,0,0),
-        Line(5,7,14,19),
-        Line(0,0,49,24),
-        Line(3,8,25,20),
-        Line(0,0,0,24)
+        Line(5, 7, 14, 19),
+        Line(3, 8, 25, 20),
+        Circle(14, 12, 11)
     ]
     print(projection)
 
