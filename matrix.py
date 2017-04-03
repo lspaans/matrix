@@ -7,7 +7,7 @@ import sys
 import time
 
 HEIGHT = 25
-WIDTH = 50
+WIDTH = 25
 
 
 class Move(object):
@@ -23,6 +23,22 @@ class Shape(object):
 
     def __iter__(self):
         return iter(self.points)
+
+    def fill(self):
+        """Maybe the fill-points should be floats as well"""
+        extremes = {}
+
+        for coords in self.points:
+            x, y = round(coords[0]), round(coords[1])
+
+            if x not in extremes:
+                extremes[x] = set([])
+
+            extremes[x].add(y)
+
+        for x in extremes:
+            for y in range(min(extremes[x]), max(extremes[x]) + 1):
+                self.points.append((x, y))
 
     @property
     def points(self):
@@ -41,12 +57,15 @@ class Shape(object):
 
 class Circle(Shape):
 
-    def __init__(self, x0=0, y0=0, radius=None):
+    def __init__(self, x0=0, y0=0, radius=None, fill=False):
         super().__init__()
 
         self.radius = min(HEIGHT, WIDTH) if radius is None else radius
         self._init_origin(x0, y0)
         self._init_points()
+
+        if fill is True:
+            self.fill()
 
     def _init_origin(self, x0, y0):
         self.x0 = x0
@@ -58,7 +77,7 @@ class Circle(Shape):
             x = self.radius * math.cos(angle*(math.pi/180)) + self.x0
             y = (math.sin(angle*(math.pi/180)) * self.radius) + self.y0
             self.points.append((x, y))
-            angle += 5 * (1.0 / self.radius)
+            angle += 10 * (1.0 / self.radius)
 
     @property
     def radius(self):
@@ -175,6 +194,61 @@ class Line(Shape):
         self._y_min = value
 
 
+class Square(Shape):
+    def __init__(self, x0=0, y0=0, side=None, fill=False):
+        super().__init__()
+
+        self.side = min(HEIGHT, WIDTH) if side is None else side
+        self._init_corner(x0, y0)
+        self._init_points()
+
+        if fill is True:
+            self.fill()
+
+    def _init_corner(self, x0, y0):
+        self._x0 = x0
+        self._y0 = y0
+
+    def _init_points(self):
+        self.points = Line(
+                self.x0, self.y0,
+                self.x0 + self.side, self.y0
+            ).points + Line(
+                self.x0 + self.side, self.y0,
+                self.x0 + self.side, self.y0 + self.side
+            ).points + Line(
+                self.x0 + self.side, self.y0 + self.side,
+                self.x0, self.y0 + self.side
+            ).points + Line(
+                self.x0, self.y0 + self.side,
+                self.x0, self.y0
+            ).points
+
+    @property
+    def side(self):
+        return self._side
+
+    @side.setter
+    def side(self, value):
+        self._side = value
+
+    @property
+    def x0(self):
+        return self._x0
+
+    @x0.setter
+    def x0(self, value):
+        self._x0 = value
+
+    @property
+    def y0(self):
+        return self._y0
+
+    @y0.setter
+    def y0(self, value):
+        self._y0 = value
+
+
 class Cell(object):
 
     _states = (".", "o", "O", "o")
@@ -275,7 +349,7 @@ class Matrix(object):
 
     def __str__(self):
         return "\n".join([
-            "".join(str(cell) for cell in row) for row in self.rows[::-1]
+            " ".join(str(cell) for cell in row) for row in self.rows[::-1]
         ])
 
     def __repr__(self):
@@ -339,7 +413,8 @@ def main():
     projection.shapes = [
         Line(5, 7, 14, 19),
         Line(3, 8, 25, 20),
-        Circle(14, 12, 11)
+        Circle(12, 12, 11),
+        Square(6,6, 12, fill=True)
     ]
     print(projection)
 
