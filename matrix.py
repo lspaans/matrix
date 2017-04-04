@@ -108,6 +108,7 @@ class Line(Shape):
 
     def __init__(self, x1=0, y1=0, x2=WIDTH, y2=HEIGHT):
         super().__init__()
+
         self._init_coordinates(x1, y1, x2, y2)
         self._init_points()
 
@@ -247,6 +248,79 @@ class Square(Shape):
     @y0.setter
     def y0(self, value):
         self._y0 = value
+
+class Triangle(Shape):
+
+    def __init__(self, x1=0, y1=0, x2=WIDTH, y2=0, x3=.5*WIDTH, y3=HEIGHT):
+        super().__init__()
+
+        self._init_coordinates(x1, y1, x2, y2, x3, y3)
+        self._init_points()
+
+    def _init_coordinates(self, x1, y1, x2, y2, x3, y3):
+        self.x1, self.y1 = x1, y1
+        self.x2, self.y2 = x2, y2
+        self.x3, self.y3 = x3, y3
+
+    def _init_points(self):
+        self.points = Line(
+                self.x1, self.y1,
+                self.x2, self.y2
+            ).points + Line(
+                self.x2, self.y2,
+                self.x3, self.y3
+            ).points + Line(
+                self.x3, self.y3,
+                self.x1, self.y1
+            ).points
+
+    @property
+    def x1(self):
+        return self._x1
+
+    @x1.setter
+    def x1(self, value):
+        self._x1 = value
+
+    @property
+    def y1(self):
+        return self._y1
+
+    @y1.setter
+    def y1(self, value):
+        self._y1 = value
+
+    @property
+    def x2(self):
+        return self._x2
+
+    @x2.setter
+    def x2(self, value):
+        self._x2 = value
+
+    @property
+    def y2(self):
+        return self._y2
+
+    @y2.setter
+    def y2(self, value):
+        self._y2 = value
+
+    @property
+    def x3(self):
+        return self._x3
+
+    @x3.setter
+    def x3(self, value):
+        self._x3 = value
+
+    @property
+    def y3(self):
+        return self._y3
+
+    @y3.setter
+    def y3(self, value):
+        self._y3 = value
 
 
 class Cell(object):
@@ -411,10 +485,10 @@ class Projection(object):
 def main():
     projection = Projection()
     projection.shapes = [
-        Line(5, 7, 14, 19),
-        Line(3, 8, 25, 20),
-        Circle(12, 12, 11),
-        Square(6,6, 12, fill=True)
+#        Triangle(),
+#        Circle(12, 12, 11),
+#        Square(6,6, 12),
+        Line(WIDTH, 0, .5*WIDTH, HEIGHT)
     ]
     print(projection)
 
